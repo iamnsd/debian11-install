@@ -1,0 +1,78 @@
+git clone https://github.com/iamnsd/debian11-install.git /tmp/debian11-install/
+
+===================================
+	1 nginx
+===================================
+
+sudo apt install nginx
+sudo ufw app list
+sudo ufw allow 'Nginx HTTP'
+sudo ufw status
+sudo systemctl enable nginx --now
+
+ip a
+hostname -I
+
+#Проверить http://<ip адрес>/ браузером
+
+===================================
+	2 MySQL
+===================================
+
+sudo apt install mysql-server
+sudo mysql_secure_installation
+sudo mysql
+exit
+
+===================================
+	3 php-fpm
+===================================
+
+sudo apt install php8.1-fpm php-mysql
+
+===================================
+	4 Конфигурация nginx + php-fpm
+===================================
+
+sudo mkdir /var/www/site1 /var/www/site2
+
+cp /tmp/debian11-install/site1 /tmp/debian11-install/site2 /etc/nginx/sites-available/
+
+sudo unlink /etc/nginx/sites-enabled/default
+sudo ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/site2 /etc/nginx/sites-enabled/
+sudo nginx -t
+
+find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec cp /tmp/debian11-install/index.html {} \;
+find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec cp /tmp/debian11-install/info.php.html {} \;
+
+#Проверить http://debian-test/index.hml http://debian-test:8080/index.html http://debian-test/info.php http://debian-test:8080/info.php
+
+===================================
+	5 Конфигурация mysql
+===================================
+
+sudo mysql
+CREATE DATABASE test_database;
+CREATE USER 'test_user'@'%' IDENTIFIED WITH mysql_native_password BY '12345678';
+GRANT ALL ON test_database.* TO 'test_user'@'%';
+exit
+
+mysql -u test_user -p
+SHOW DATABASES;
+
+CREATE TABLE test_database.test_list (
+	id INT AUTO_INCREMENT,
+	content VARCHAR(255),
+	PRIMARY KEY(id)
+);
+
+INSERT INTO test_database.test_list (content) VALUES ("1 item");
+
+SELECT * FROM test_database.test_list;
+
+exit
+
+cp /tmp/debian11-install/mysql.php /var/www/site1/
+
+#Проверить http://debian-test/mysql.php

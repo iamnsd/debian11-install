@@ -1,0 +1,76 @@
+===================================
+	1 Отключение DVD репозитория
+===================================
+
+Если установка выполнялась с DVD ISO, необходимо отключить DVD репозиторий:
+Открыть терминал, сменить пользователя на root, отредактировать файл /etc/apt/sources.list
+
+su - root
+vi /etc/apt/sources.list
+
+Выполнить:
+apt update
+
+===================================
+	2 Конфигурирование sudo
+===================================
+
+su - root
+apt install sudo -y
+usermod -aG sudo morza
+su – morza
+sudo apt update
+
+===================================
+	3 Обновление системы
+===================================
+
+sudo apt update
+sudo apt upgrade -y
+sudo reboot
+
+===================================
+	3 Firewall
+===================================
+
+sudo apt install -y ufw
+sudo ufw status
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw app list
+sudo ufw ssh
+sudo ufw enable
+
+===================================
+	4 Базовый софт
+===================================
+
+sudo apt install -y vim nano htop screen mc wget curl git
+
+===================================
+	5 Настройка SSH
+===================================
+
+В cmd на windows клиенте:
+ssh-keygen -b 4096
+
+#Вручную добавить ключ на сервер:
+mkdir -p ~/.ssh
+echo public_key_string >> ~/.ssh/authorized_keys
+ls -la ~/.ssh
+
+#Если права не пользовательские то:
+chmod -R go= ~/.ssh
+chown -R morza:morza ~/.ssh
+
+#Проверить подключение через cmd на windows клиенте:
+ssh morza@host
+
+#Отключить авторизацию по паролю:
+sudo vim /etc/ssh/sshd_config
+
+. . .
+PasswordAuthentication no
+. . .
+
+sudo systemctl restart sshd

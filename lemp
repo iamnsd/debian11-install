@@ -43,8 +43,12 @@ sudo ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/
 sudo ln -s /etc/nginx/sites-available/site2 /etc/nginx/sites-enabled/
 sudo nginx -t
 
-find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec cp /tmp/debian11-install/index.html {} \;
-find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec cp /tmp/debian11-install/info.php.html {} \;
+#Проверить что nginx слушает порты 80 и 8080
+sudo lsof -i -P -n | grep LISTEN
+sudo ss -tulpn | grep LISTEN
+
+sudo find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec sudo cp /tmp/debian11-install/index.html {} \;
+sudo find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec sudo cp /tmp/debian11-install/info.php {} \;
 
 #Проверить http://debian-test/index.hml http://debian-test:8080/index.html http://debian-test/info.php http://debian-test:8080/info.php
 
@@ -73,6 +77,6 @@ SELECT * FROM test_database.test_list;
 
 exit
 
-cp /tmp/debian11-install/mysql.php /var/www/site1/
+sudo cp /tmp/debian11-install/mysql.php /var/www/site1/
 
 #Проверить http://debian-test/mysql.php

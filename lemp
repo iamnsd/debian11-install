@@ -5,7 +5,7 @@ git clone https://github.com/iamnsd/debian11-install.git /tmp/debian11-install/
 	1 nginx
 ===================================
 
-sudo apt install nginx
+sudo apt install nginx -y
 sudo ufw app list
 sudo ufw allow 'Nginx HTTP'
 sudo ufw status
@@ -20,16 +20,35 @@ hostname -I
 	2 MySQL
 ===================================
 
-sudo apt install mysql-server
+#Найти ссылку на .deb пакет репозитариев MySQL на https://dev.mysql.com/downloads/repo/apt/
+#Щелкнуть Download, после скопировать ссылку с "No thanks, just start my download."
+
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb
+sudo apt install ./mysql-apt-config_0.8.23-1_all.deb
+
+#клавишей TAB выбираем пункт ОК
+
+sudo apt update
+sudo apt install mysql-server -y
+sudo apt policy mysql-server
+sudo systemctl status mysql
+#Если сервис не запущен и имеет статус disabled то выполнить:
+sudo systemctl enable mysql --now 
+
 sudo mysql_secure_installation
-sudo mysql
+sudo mysql -p
 exit
 
 ===================================
 	3 php-fpm
 ===================================
 
-sudo apt install php8.1-fpm php-mysql
+sudo apt install ca-certificates apt-transport-https software-properties-common lsb-release -y
+curl -sSL https://packages.sury.org/php/README.txt | sudo bash -x
+sudo apt update
+sudo apt install php8.1-fpm php8.1-mysql -y
+sudo systemctl status php8.1-fpm
+php -v
 
 ===================================
 	4 Конфигурация nginx + php-fpm
@@ -43,13 +62,17 @@ sudo unlink /etc/nginx/sites-enabled/default
 sudo ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/
 sudo ln -s /etc/nginx/sites-available/site2 /etc/nginx/sites-enabled/
 sudo nginx -t
+sudo nginx -s reload
 
 #Проверить что nginx слушает порты 80 и 8080
 sudo lsof -i -P -n | grep LISTEN
 sudo ss -tulpn | grep LISTEN
+sudo ufw allow 8080/tcp && sudo ufw reload
 
 sudo find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec sudo cp /tmp/debian11-install/index.html {} \;
 sudo find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec sudo cp /tmp/debian11-install/info.php {} \;
+
+
 
 #Проверить http://debian-test/index.hml http://debian-test:8080/index.html http://debian-test/info.php http://debian-test:8080/info.php
 
@@ -57,7 +80,7 @@ sudo find /var/www/site1/ /var/www/site2/ -maxdepth 0 -exec sudo cp /tmp/debian1
 	5 Конфигурация mysql
 ===================================
 
-sudo mysql
+sudo mysql -p
 CREATE DATABASE test_database;
 CREATE USER 'test_user'@'%' IDENTIFIED WITH mysql_native_password BY '12345678';
 GRANT ALL ON test_database.* TO 'test_user'@'%';
